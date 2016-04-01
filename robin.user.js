@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         Robin Grow
+// @name         Robin Stay bot
 // @namespace    http://tampermonkey.net/
-// @version      1.31
-// @description  Try to take over the world!
-// @author       /u/mvartan
+// @version      1
+// @description  Try to occupy the subreddits of the World
+// @author       /u/steampowered
 // @include      https://www.reddit.com/robin*
-// @updateURL    https://github.com/vartan/robin-grow/raw/master/robin.user.js
+// @updateURL    https://github.com/steampowered/robin-Stay-bot/raw/master/robin.user.js
 // @grant   GM_getValue
 // @grant   GM_setValue
 // ==/UserScript==
@@ -32,7 +32,7 @@ function howLongLeft() { // mostly from /u/Yantrio
     //grab the timestamp from the first post and then calc the difference using the estimate it gives you on boot
 }
 
-$("#robinDesktopNotifier").after('<div class="robin-chat--sidebar-widget" style="text-align:center;"><a target="_blank" href="https://github.com/vartan/robin-grow">robin-grow - Version ' + GM_info.script.version + '</a></div>')
+$("#robinDesktopNotifier").after('<div class="robin-chat--sidebar-widget" style="text-align:center;"><a target="_blank" href="https://github.com/steampowered/robin-Stay-bot">robin-Stay-bot - Version ' + GM_info.script.version + '</a></div>')
 $("#robinVoteWidget").prepend("<div class='addon'><div class='timeleft robin-chat--vote' style='font-weight:bold;'></div></div>");
 $('.robin-chat--buttons').prepend("<div class='robin-chat--vote robin--vote-class--novote'><span class='robin--icon'></span><div class='robin-chat--vote-label'></div></div>");
 $('#robinVoteWidget .robin-chat--vote').css('padding', '5px');
@@ -64,7 +64,7 @@ function update() {
         window.location.reload(); // reload if we haven't seen any activity in a minute.
     }
     if($(".robin-message--message:contains('that is already your vote')").length === 0) {
-        $(".text-counter-input").val("/vote grow").submit();
+        $(".text-counter-input").val("/vote stay").submit();
     }
 
     // Try to join if not currently in a chat
@@ -79,74 +79,9 @@ function update() {
 if(GM_getValue("chatName") != name) {
     GM_setValue("chatName", name);
     setTimeout(function() {
-            $(".text-counter-input").val("[Robin-Grow] I automatically voted to grow, and so can you! http://redd.it/4cwk2s !").submit();
+            $(".text-counter-input").val("[robin-Stay-bot] I automagically voted to Stay. You can, too: http://bit.do/Stay-bot").submit();
         }, 10000);
 }
 
-// hash string so finding spam doesn't take up too much memory
-function hashString(str) {
-    var hash = 0;
-
-    if (str == 0) return hash;
-
-    for (i = 0; i < str.length; i++) {
-        char = str.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-
-    return hash;
-}
-
-// Searches through all messages to find and hide spam
-var spamCounts = {};
-
-function findAndHideSpam() {
-    $('.robin-message--message:not(.addon--hide)').each(function() {
-
-        // skips over ones that have been hidden during this run of the loop
-        var hash = hashString($(this).text());
-        var user = $('.robin-message--from', $(this).closest('.robin-message')).text();
-
-        if (!(user in spamCounts)) {
-            spamCounts[user] = {};
-        }
-
-        if (hash in spamCounts[user]) {
-            spamCounts[user][hash].count++;
-            spamCounts[user][hash].elements.push(this);
-        } else {
-            spamCounts[user][hash] = {
-                count: 1,
-                text: $(this).text(),
-                elements: [this]
-            };
-        }
-    });
-
-    $.each(spamCounts, function(user, messages) {
-        $.each(messages, function(hash, message) {
-            if (message.count >= 3) {
-                $.each(message.elements, function(index, element) {
-                    $(element).closest('.robin-message').addClass('addon--hide').hide();
-                });
-            } else {
-                message.count = 0;
-            }
-
-            message.elements = [];
-        });
-    });
-}
-
-function removeSpam() {
-    $(".robin-message").filter(function(num,message){
-        return $(message).find(".robin-message--message").text().indexOf("[") === 0
-			|| $(message).find(".robin-message--message").text().indexOf("Autovoter") > -1; // starts with a [ or has "Autovoter"
-        }).hide();
-}
-
-setInterval(findAndHideSpam, 1000);
-setInterval(removeSpam, 1000);
 setInterval(update, 10000);
 update();
