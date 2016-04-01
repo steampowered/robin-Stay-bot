@@ -1,5 +1,5 @@
 # robin-Stay-bot
-# No spam Control - those who Stay must watch those who Grow
+## No spam Control - those who Stay must watch those who Grow
 
 Step 1: Install a userscript extension such as greasemonkey or tampermonkey:
 
